@@ -3,8 +3,9 @@
 Experimental protocol and frontend integration package for website-to-adapter handoffs.
 
 > [!IMPORTANT]
-> This is an early GitHub beta. The public npm package and hosted Connect service are not live.
-> The current FACEIT integration uses direct `addonport://` links and does not require this SDK.
+> This is an early GitHub beta and is not published to npm. The hosted Connect service is live at
+> `https://connect.addonport.dev`, while direct `addonport://` links remain the simplest FACEIT
+> integration and do not require this SDK.
 
 ## Install
 
@@ -29,13 +30,13 @@ Vue.
 
 ## Core client
 
-Against a locally running [AddonPort Connect](https://github.com/AddonPort/connect) service:
+Against the public beta [AddonPort Connect](https://github.com/AddonPort/connect) service:
 
 ~~~ts
 import { AddonPortClient } from "@addonport/sdk";
 
 const client = new AddonPortClient({
-  apiBaseUrl: "http://localhost:8787",
+  apiBaseUrl: "https://connect.addonport.dev",
   client: { name: "extension-site", version: "1.0.0" },
 });
 
