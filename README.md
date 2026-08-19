@@ -4,7 +4,7 @@ Experimental protocol and frontend integration package for website-to-adapter ha
 
 > [!IMPORTANT]
 > This is an early GitHub beta. The public npm package and hosted Connect service are not live.
-> The current FACEIT integration uses direct `faceit-mods://` links and does not require this SDK.
+> The current FACEIT integration uses direct `addonport://` links and does not require this SDK.
 
 ## Install
 
@@ -57,6 +57,6 @@ pnpm check
 ~~~
 
 For the integration that works with the current public FACEIT beta, use the
-[`faceit-mods://` contract](https://github.com/AddonPort/faceit/blob/main/docs/INTEGRATION.md).
+[`addonport://` contract](https://github.com/AddonPort/faceit/blob/dev/docs/INTEGRATION.md).
 Framework examples for the generic flow currently live in the
 [website source](https://github.com/AddonPort/website).
