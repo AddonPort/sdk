@@ -1,5 +1,6 @@
 import "./elements.js";
-import { forwardRef, type HTMLAttributes, useEffect, useRef } from "react";
+import type { HTMLAttributes } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 import type { SessionSnapshot } from "./index.js";
 
 export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLElement>, "onError"> {

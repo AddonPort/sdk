@@ -1,5 +1,6 @@
 import { Check, CircleAlert, createElement, Download, LoaderCircle } from "lucide";
-import { AddonPortClient, type AddonPortSession, type SessionSnapshot } from "./index.js";
+import type { AddonPortSession, SessionSnapshot } from "./index.js";
+import { AddonPortClient } from "./index.js";
 
 export const ADDONPORT_INSTALL_BUTTON_TAG = "addonport-install-button";
 

@@ -1,15 +1,17 @@
+import type {
+  AddonPortIntent,
+  CreatedSession,
+  CreateSessionRequest,
+  SessionSnapshot,
+} from "./protocol.js";
 import {
-  type AddonPortIntent,
   assertIntent,
-  type CreatedSession,
-  type CreateSessionRequest,
   isRecord,
   isSessionId,
   isSessionState,
   isSessionToken,
   isTerminalSessionState,
   parseConnectDeepLink,
-  type SessionSnapshot,
 } from "./protocol.js";
 
 export type { AddonPortIntent, CreatedSession, SessionSnapshot } from "./protocol.js";
