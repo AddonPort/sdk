@@ -5,8 +5,10 @@ The protocol and frontend integration package for opening AddonPort adapters fro
 ## Install
 
 ~~~bash
-npm install @addonport/sdk
+npm install github:AddonPort/sdk#v0.1.0-beta.1
 ~~~
+
+This installs the current GitHub beta. The public npm package is not live yet.
 
 ## Entry points
 
