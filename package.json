@@ -48,7 +48,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/protocol.ts src/elements.ts src/react.tsx src/vue.ts --format esm --dts --clean --external react --external vue",
+    "build": "tsup src/index.ts src/protocol.ts src/elements.ts src/react.tsx src/vue.ts --format esm --clean --external react --external vue && tsc -p tsconfig.build.json",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "format": "biome format --write .",
     "lint": "biome check .",
