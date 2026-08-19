@@ -1,6 +1,10 @@
 # AddonPort SDK
 
-The protocol and frontend integration package for opening AddonPort adapters from websites.
+Experimental protocol and frontend integration package for website-to-adapter handoffs.
+
+> [!IMPORTANT]
+> This is an early GitHub beta. The public npm package and hosted Connect service are not live.
+> The current FACEIT integration uses direct `faceit-mods://` links and does not require this SDK.
 
 ## Install
 
@@ -25,11 +29,13 @@ Vue.
 
 ## Core client
 
+Against a locally running [AddonPort Connect](https://github.com/AddonPort/connect) service:
+
 ~~~ts
 import { AddonPortClient } from "@addonport/sdk";
 
 const client = new AddonPortClient({
-  apiBaseUrl: "https://connect.addonport.dev",
+  apiBaseUrl: "http://localhost:8787",
   client: { name: "extension-site", version: "1.0.0" },
 });
 
@@ -50,5 +56,7 @@ pnpm install
 pnpm check
 ~~~
 
-See [addonport.dev/developers](https://addonport.dev/developers) for framework examples and the
-native Windows integration contract.
+For the integration that works with the current public FACEIT beta, use the
+[`faceit-mods://` contract](https://github.com/AddonPort/faceit/blob/main/docs/INTEGRATION.md).
+Framework examples for the generic flow currently live in the
+[website source](https://github.com/AddonPort/website).
