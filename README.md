@@ -1,19 +1,17 @@
 # AddonPort SDK
 
-Experimental protocol and frontend integration package for website-to-adapter handoffs.
+Protocol and frontend integration package for website-to-adapter handoffs.
 
 > [!IMPORTANT]
-> This is an early GitHub beta and is not published to npm. The install button uses the public
-> AddonPort Connect service by default and falls back to a direct `addonport://install` handoff if a
-> session cannot be prepared or no compatible client claims it.
+> This is a public beta. The install button uses the public AddonPort Connect service by default and
+> falls back to a direct `addonport://install` handoff if a session cannot be prepared or no
+> compatible client claims it.
 
 ## Install
 
 ~~~bash
-npm install github:AddonPort/sdk#v0.1.0-beta.3
+npm install @addonport/sdk@beta
 ~~~
-
-This installs the current GitHub beta. The public npm package is not live yet.
 
 ## Entry points
 
