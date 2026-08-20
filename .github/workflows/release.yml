@@ -58,13 +58,13 @@ jobs:
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
-          node-version: 22.12
-          cache: pnpm
+          node-version: 24
           registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@12.0.2
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - name: Publish npm package
         run: |
           tag=latest
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then tag=beta; fi
-          pnpm publish --no-git-checks --provenance --tag "$tag"
+          npm publish --access public --tag "$tag"
