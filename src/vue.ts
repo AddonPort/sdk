@@ -1,5 +1,6 @@
 import "./elements.js";
 import { defineComponent, h } from "vue";
+import type { AddonPortOpenDetail } from "./elements.js";
 import type { SessionSnapshot } from "./index.js";
 
 export const AddonPortInstallButton = defineComponent({
@@ -12,6 +13,7 @@ export const AddonPortInstallButton = defineComponent({
     disabled: { type: Boolean, default: false },
   },
   emits: {
+    open: (_handoff: AddonPortOpenDetail) => true,
     status: (_session: SessionSnapshot) => true,
     complete: (_session: SessionSnapshot) => true,
     error: (_error: unknown) => true,
@@ -24,6 +26,7 @@ export const AddonPortInstallButton = defineComponent({
         label: props.label,
         "api-base-url": props.apiBaseUrl,
         disabled: props.disabled ? "" : undefined,
+        "onAddonport-open": (event: CustomEvent<AddonPortOpenDetail>) => emit("open", event.detail),
         "onAddonport-status": (event: CustomEvent<SessionSnapshot>) => emit("status", event.detail),
         "onAddonport-complete": (event: CustomEvent<SessionSnapshot>) =>
           emit("complete", event.detail),

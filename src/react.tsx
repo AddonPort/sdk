@@ -1,6 +1,7 @@
 import "./elements.js";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useRef } from "react";
+import type { AddonPortOpenDetail } from "./elements.js";
 import type { SessionSnapshot } from "./index.js";
 
 export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLElement>, "onError"> {
@@ -8,6 +9,7 @@ export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLEle
   label?: string;
   apiBaseUrl?: string;
   disabled?: boolean;
+  onOpen?: (handoff: AddonPortOpenDetail) => void;
   onStatus?: (session: SessionSnapshot) => void;
   onComplete?: (session: SessionSnapshot) => void;
   onError?: (error: unknown) => void;
@@ -15,7 +17,7 @@ export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLEle
 
 export const AddonPortInstallButton = forwardRef<HTMLElement, AddonPortInstallButtonProps>(
   function AddonPortInstallButton(
-    { target, label, apiBaseUrl, disabled, onStatus, onComplete, onError, ...props },
+    { target, label, apiBaseUrl, disabled, onOpen, onStatus, onComplete, onError, ...props },
     forwardedRef,
   ) {
     const localRef = useRef<HTMLElement | null>(null);
@@ -24,18 +26,21 @@ export const AddonPortInstallButton = forwardRef<HTMLElement, AddonPortInstallBu
       const element = localRef.current;
       if (!element) return;
       const status = (event: Event) => onStatus?.((event as CustomEvent<SessionSnapshot>).detail);
+      const open = (event: Event) => onOpen?.((event as CustomEvent<AddonPortOpenDetail>).detail);
       const complete = (event: Event) =>
         onComplete?.((event as CustomEvent<SessionSnapshot>).detail);
       const error = (event: Event) => onError?.((event as CustomEvent<unknown>).detail);
+      element.addEventListener("addonport-open", open);
       element.addEventListener("addonport-status", status);
       element.addEventListener("addonport-complete", complete);
       element.addEventListener("addonport-error", error);
       return () => {
+        element.removeEventListener("addonport-open", open);
         element.removeEventListener("addonport-status", status);
         element.removeEventListener("addonport-complete", complete);
         element.removeEventListener("addonport-error", error);
       };
-    }, [onComplete, onError, onStatus]);
+    }, [onComplete, onError, onOpen, onStatus]);
 
     return (
       <addonport-install-button

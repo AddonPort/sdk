@@ -1,10 +1,19 @@
 import { Check, CircleAlert, createElement, Download, LoaderCircle } from "lucide";
-import type { AddonPortSession, SessionSnapshot } from "./index.js";
+import type { AddonPortIntent, AddonPortSession, SessionSnapshot } from "./index.js";
 import { AddonPortClient } from "./index.js";
+import { createDirectDeepLink } from "./protocol.js";
 
 export const ADDONPORT_INSTALL_BUTTON_TAG = "addonport-install-button";
 
 type ButtonPhase = "idle" | "preparing" | "opening" | "waiting" | "complete" | "error";
+export type AddonPortButtonMode = "direct" | "session";
+
+export interface AddonPortOpenDetail {
+  mode: AddonPortButtonMode;
+  intent: AddonPortIntent;
+  deepLink: string;
+}
+
 const HTMLElementBase = (globalThis.HTMLElement ?? class {}) as typeof HTMLElement;
 
 export class AddonPortInstallButton extends HTMLElementBase {
@@ -17,6 +26,7 @@ export class AddonPortInstallButton extends HTMLElementBase {
   #client?: AddonPortClient;
   #session?: AddonPortSession;
   #preparePromise?: Promise<AddonPortSession>;
+  #resetTimer?: ReturnType<typeof setTimeout>;
   #phase: ButtonPhase = "idle";
 
   constructor() {
@@ -49,9 +59,11 @@ export class AddonPortInstallButton extends HTMLElementBase {
     this.#button.removeEventListener("pointerdown", this.#prepare);
     this.#button.removeEventListener("focus", this.#prepare);
     this.#button.removeEventListener("click", this.#activate);
+    this.#clearResetTimer();
   }
 
   attributeChangedCallback(): void {
+    this.#clearResetTimer();
     this.#client = undefined;
     this.#session = undefined;
     this.#preparePromise = undefined;
@@ -68,7 +80,13 @@ export class AddonPortInstallButton extends HTMLElementBase {
   }
 
   #prepare = (): void => {
-    if (this.#phase !== "idle" || this.hasAttribute("disabled") || !this.target) return;
+    if (
+      !this.#usesSession ||
+      this.#phase !== "idle" ||
+      this.hasAttribute("disabled") ||
+      !this.target
+    )
+      return;
     void this.#ensureSession().catch(() => undefined);
   };
 
@@ -76,10 +94,15 @@ export class AddonPortInstallButton extends HTMLElementBase {
     if (this.hasAttribute("disabled") || !this.target || !["idle", "error"].includes(this.#phase))
       return;
     try {
+      if (!this.#usesSession) {
+        this.#openDirect();
+        return;
+      }
       const session = await this.#ensureSession();
       this.#phase = "opening";
       this.#render();
       session.open();
+      this.#dispatchOpen("session", session.intent, session.created.deepLink);
       this.#phase = "waiting";
       this.#render();
       const result = await session.wait({ onStatus: this.#handleStatus });
@@ -126,12 +149,47 @@ export class AddonPortInstallButton extends HTMLElementBase {
 
   #getClient(): AddonPortClient {
     if (!this.#client) {
+      const apiBaseUrl = this.getAttribute("api-base-url")?.trim();
+      if (!apiBaseUrl) throw new TypeError("Session mode requires api-base-url.");
       this.#client = new AddonPortClient({
-        apiBaseUrl: this.getAttribute("api-base-url") || "https://connect.addonport.dev",
-        client: { name: "@addonport/sdk/elements", version: "0.1.0" },
+        apiBaseUrl,
+        client: { name: "@addonport/sdk/elements", version: "0.1.0-beta.2" },
       });
     }
     return this.#client;
+  }
+
+  get #usesSession(): boolean {
+    return Boolean(this.getAttribute("api-base-url")?.trim());
+  }
+
+  #openDirect(): void {
+    const intent = { action: "install", target: this.target } as const;
+    const deepLink = createDirectDeepLink(intent);
+    this.#phase = "opening";
+    this.#render();
+    window.location.assign(deepLink);
+    this.#dispatchOpen("direct", intent, deepLink);
+    this.#resetTimer = setTimeout(() => {
+      this.#phase = "idle";
+      this.#render();
+    }, 1_200);
+  }
+
+  #dispatchOpen(mode: AddonPortButtonMode, intent: AddonPortIntent, deepLink: string): void {
+    const detail: AddonPortOpenDetail = { mode, intent, deepLink };
+    this.dispatchEvent(
+      new CustomEvent<AddonPortOpenDetail>("addonport-open", {
+        detail,
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  #clearResetTimer(): void {
+    if (this.#resetTimer !== undefined) clearTimeout(this.#resetTimer);
+    this.#resetTimer = undefined;
   }
 
   #handleStatus = (snapshot: SessionSnapshot): void => {
@@ -181,6 +239,7 @@ function buttonContent(phase: ButtonPhase, label: string) {
     case "preparing":
       return { text: "Preparing...", icon: LoaderCircle };
     case "opening":
+      return { text: "Opening AddonPort", icon: LoaderCircle };
     case "waiting":
       return { text: "Waiting for AddonPort", icon: LoaderCircle };
     case "complete":

@@ -1,6 +1,6 @@
 {
   "name": "@addonport/sdk",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Protocol and frontend SDK for AddonPort native add-on handoffs.",
   "license": "MIT",
   "repository": {
@@ -17,6 +17,7 @@
     "./src/react.tsx",
     "./src/vue.ts",
     "./dist/elements.js",
+    "./dist/embed.js",
     "./dist/react.js",
     "./dist/vue.js"
   ],
@@ -33,6 +34,10 @@
       "types": "./dist/elements.d.ts",
       "import": "./dist/elements.js"
     },
+    "./embed": {
+      "types": "./dist/embed.d.ts",
+      "import": "./dist/embed.js"
+    },
     "./react": {
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
@@ -48,7 +53,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/protocol.ts src/elements.ts src/react.tsx src/vue.ts --format esm --clean --external react --external vue && tsc -p tsconfig.build.json",
+    "build": "tsup src/index.ts src/protocol.ts src/elements.ts src/embed.ts src/react.tsx src/vue.ts --format esm --clean --external react --external vue && tsup --entry.addonport-button src/embed.ts --format iife --global-name AddonPort --minify --out-dir dist/browser && tsc -p tsconfig.build.json",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "format": "biome format --write .",
     "lint": "biome check .",

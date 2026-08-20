@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AddonPort install button example</title>
+    <script src="../dist/browser/addonport-button.global.js" defer></script>
+  </head>
+  <body>
+    <addonport-install-button
+      target="abcdefghijklmnopabcdefghijklmnop"
+      label="Install for FACEIT"
+    ></addonport-install-button>
+
+    <script>
+      document.addEventListener("addonport-open", (event) => {
+        console.log("AddonPort handoff", event.detail);
+      });
+    </script>
+  </body>
+</html>
