@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { AddonPortClient } from "../src/index.js";
+import { AddonPortClient, DEFAULT_ADDONPORT_API_BASE_URL } from "../src/index.js";
 
 const created = {
   protocolVersion: 2 as const,
@@ -11,6 +11,11 @@ const created = {
 };
 
 describe("AddonPortClient", () => {
+  it("uses the public Connect service by default", () => {
+    const client = new AddonPortClient({});
+    expect(client.apiBaseUrl).toBe(DEFAULT_ADDONPORT_API_BASE_URL);
+  });
+
   it("prepares, opens, and polls a session", async () => {
     const launch = vi.fn();
     const fetch = vi

@@ -3,14 +3,14 @@
 Experimental protocol and frontend integration package for website-to-adapter handoffs.
 
 > [!IMPORTANT]
-> This is an early GitHub beta and is not published to npm. Direct `addonport://` handoffs are the
-> default and require no backend. Session mode is optional and requires a Connect endpoint that
-> explicitly allows the integrating site's origin.
+> This is an early GitHub beta and is not published to npm. The install button uses the public
+> AddonPort Connect service by default and falls back to a direct `addonport://install` handoff if a
+> session cannot be prepared or no compatible client claims it.
 
 ## Install
 
 ~~~bash
-npm install github:AddonPort/sdk#v0.1.0-beta.2
+npm install github:AddonPort/sdk#v0.1.0-beta.3
 ~~~
 
 This installs the current GitHub beta. The public npm package is not live yet.
@@ -34,7 +34,7 @@ Vue.
 The standalone browser build registers `<addonport-install-button>` automatically:
 
 ~~~html
-<script src="https://addonport.dev/sdk/v0.1.0-beta.2/addonport-button.js" defer></script>
+<script src="https://addonport.dev/sdk/v0.1.0-beta.3/addonport-button.js" defer></script>
 
 <addonport-install-button
   target="abcdefghijklmnopabcdefghijklmnop"
@@ -42,19 +42,23 @@ The standalone browser build registers `<addonport-install-button>` automaticall
 ></addonport-install-button>
 ~~~
 
-By default the button opens `addonport://install/<target>` directly. It does not contact AddonPort
-Connect and cannot claim that installation completed. Listen for `addonport-open` to observe the
-handoff request:
+By default the button creates a short-lived session through `https://connect.addonport.dev`, opens
+its `addonport://connect/...` handoff, and reports status until the FACEIT adapter completes or
+rejects the request. Listen for the lifecycle events to update the surrounding page:
 
 ~~~js
 document.querySelector("addonport-install-button").addEventListener("addonport-open", (event) => {
   console.log(event.detail.mode, event.detail.intent, event.detail.deepLink);
 });
+
+document.querySelector("addonport-install-button").addEventListener("addonport-complete", (event) => {
+  console.log(event.detail.state, event.detail.result);
+});
 ~~~
 
-Add `api-base-url="https://your-connect-endpoint.example"` only when you operate a compatible
-session endpoint that allows the embedding origin. Session mode additionally emits
-`addonport-status` and `addonport-complete`.
+Set `mode="direct"` to skip Connect and open `addonport://install/<target>` immediately. Set
+`api-base-url="https://your-connect-endpoint.example"` to use a compatible private service instead
+of the public endpoint.
 
 ### Element contract
 
@@ -63,7 +67,8 @@ session endpoint that allows the embedding origin. Session mode additionally emi
 | `target` | Yes | Chrome Web Store extension ID or AddonPort catalog slug |
 | `label` | No | Idle button label; defaults to `Install with AddonPort` |
 | `disabled` | No | Boolean attribute that disables interaction |
-| `api-base-url` | No | Enables session mode against the specified Connect endpoint |
+| `mode` | No | `session` by default; set to `direct` to skip Connect |
+| `api-base-url` | No | Overrides the public Connect endpoint used by session mode |
 
 | Event | `detail` | Emitted in |
 | --- | --- | --- |
@@ -72,8 +77,10 @@ session endpoint that allows the embedding origin. Session mode additionally emi
 | `addonport-complete` | Completed `SessionSnapshot` | Session mode |
 | `addonport-error` | The thrown error | Direct and session modes |
 
-`addonport-open` confirms only that the page requested a native handoff. It does not prove that the
-protocol handler exists or that installation completed.
+`addonport-open` confirms only that the page requested a native handoff. A completed session is a
+user-experience signal, not authentication or device attestation. If session preparation fails, the
+button emits `addonport-error` before opening the direct fallback; `addonport-open.detail.mode` then
+equals `direct`.
 
 The Shadow DOM exposes `button`, `icon`, and `label` parts. Override
 `--addonport-accent`, `--addonport-bg`, and `--addonport-fg` on the host element to match the site.
@@ -118,7 +125,6 @@ Against the public beta [AddonPort Connect](https://github.com/AddonPort/connect
 import { AddonPortClient } from "@addonport/sdk";
 
 const client = new AddonPortClient({
-  apiBaseUrl: "https://connect.addonport.dev",
   client: { name: "extension-site", version: "1.0.0" },
 });
 

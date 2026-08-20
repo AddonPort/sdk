@@ -16,8 +16,10 @@ import {
 
 export type { AddonPortIntent, CreatedSession, SessionSnapshot } from "./protocol.js";
 
+export const DEFAULT_ADDONPORT_API_BASE_URL = "https://connect.addonport.dev";
+
 export interface AddonPortClientOptions {
-  apiBaseUrl: string;
+  apiBaseUrl?: string;
   fetch?: typeof globalThis.fetch;
   launch?: (deepLink: string) => void;
   pollIntervalMs?: number;
@@ -79,7 +81,7 @@ export class AddonPortClient {
   #launch: (deepLink: string) => void;
 
   constructor(options: AddonPortClientOptions) {
-    const apiUrl = new URL(options.apiBaseUrl);
+    const apiUrl = new URL(options.apiBaseUrl ?? DEFAULT_ADDONPORT_API_BASE_URL);
     const localHttp =
       apiUrl.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(apiUrl.hostname);
     if (

@@ -1,6 +1,6 @@
 import { Check, CircleAlert, createElement, Download, LoaderCircle } from "lucide";
 import type { AddonPortIntent, AddonPortSession, SessionSnapshot } from "./index.js";
-import { AddonPortClient } from "./index.js";
+import { AddonPortClient, AddonPortError, DEFAULT_ADDONPORT_API_BASE_URL } from "./index.js";
 import { createDirectDeepLink } from "./protocol.js";
 
 export const ADDONPORT_INSTALL_BUTTON_TAG = "addonport-install-button";
@@ -14,10 +14,14 @@ export interface AddonPortOpenDetail {
   deepLink: string;
 }
 
+export function resolveAddonPortButtonMode(value: string | null): AddonPortButtonMode {
+  return value?.trim().toLowerCase() === "direct" ? "direct" : "session";
+}
+
 const HTMLElementBase = (globalThis.HTMLElement ?? class {}) as typeof HTMLElement;
 
 export class AddonPortInstallButton extends HTMLElementBase {
-  static readonly observedAttributes = ["target", "label", "api-base-url", "disabled"];
+  static readonly observedAttributes = ["target", "label", "mode", "api-base-url", "disabled"];
 
   #root: ShadowRoot;
   #button: HTMLButtonElement;
@@ -47,17 +51,13 @@ export class AddonPortInstallButton extends HTMLElementBase {
   }
 
   connectedCallback(): void {
-    this.#button.addEventListener("pointerenter", this.#prepare);
     this.#button.addEventListener("pointerdown", this.#prepare);
-    this.#button.addEventListener("focus", this.#prepare);
     this.#button.addEventListener("click", this.#activate);
     this.#render();
   }
 
   disconnectedCallback(): void {
-    this.#button.removeEventListener("pointerenter", this.#prepare);
     this.#button.removeEventListener("pointerdown", this.#prepare);
-    this.#button.removeEventListener("focus", this.#prepare);
     this.#button.removeEventListener("click", this.#activate);
     this.#clearResetTimer();
   }
@@ -91,7 +91,11 @@ export class AddonPortInstallButton extends HTMLElementBase {
   };
 
   #activate = async (): Promise<void> => {
-    if (this.hasAttribute("disabled") || !this.target || !["idle", "error"].includes(this.#phase))
+    if (
+      this.hasAttribute("disabled") ||
+      !this.target ||
+      !["idle", "error", "preparing"].includes(this.#phase)
+    )
       return;
     try {
       if (!this.#usesSession) {
@@ -112,6 +116,10 @@ export class AddonPortInstallButton extends HTMLElementBase {
         );
       }
     } catch (error) {
+      const shouldOpenDirectFallback =
+        this.#usesSession &&
+        (!this.#session?.opened ||
+          (error instanceof AddonPortError && error.code === "client_unavailable"));
       this.#session = undefined;
       this.#preparePromise = undefined;
       this.#phase = "error";
@@ -120,6 +128,7 @@ export class AddonPortInstallButton extends HTMLElementBase {
       this.dispatchEvent(
         new CustomEvent("addonport-error", { detail: error, bubbles: true, composed: true }),
       );
+      if (shouldOpenDirectFallback) this.#openDirect();
     }
   };
 
@@ -149,18 +158,18 @@ export class AddonPortInstallButton extends HTMLElementBase {
 
   #getClient(): AddonPortClient {
     if (!this.#client) {
-      const apiBaseUrl = this.getAttribute("api-base-url")?.trim();
-      if (!apiBaseUrl) throw new TypeError("Session mode requires api-base-url.");
+      const apiBaseUrl =
+        this.getAttribute("api-base-url")?.trim() || DEFAULT_ADDONPORT_API_BASE_URL;
       this.#client = new AddonPortClient({
         apiBaseUrl,
-        client: { name: "@addonport/sdk/elements", version: "0.1.0-beta.2" },
+        client: { name: "@addonport/sdk/elements", version: "0.1.0-beta.3" },
       });
     }
     return this.#client;
   }
 
   get #usesSession(): boolean {
-    return Boolean(this.getAttribute("api-base-url")?.trim());
+    return resolveAddonPortButtonMode(this.getAttribute("mode")) === "session";
   }
 
   #openDirect(): void {

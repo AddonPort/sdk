@@ -1,6 +1,6 @@
 import "./elements.js";
-import { defineComponent, h } from "vue";
-import type { AddonPortOpenDetail } from "./elements.js";
+import { defineComponent, h, type PropType } from "vue";
+import type { AddonPortButtonMode, AddonPortOpenDetail } from "./elements.js";
 import type { SessionSnapshot } from "./index.js";
 
 export const AddonPortInstallButton = defineComponent({
@@ -9,6 +9,7 @@ export const AddonPortInstallButton = defineComponent({
   props: {
     target: { type: String, required: true },
     label: { type: String, default: undefined },
+    mode: { type: String as PropType<AddonPortButtonMode>, default: undefined },
     apiBaseUrl: { type: String, default: undefined },
     disabled: { type: Boolean, default: false },
   },
@@ -24,6 +25,7 @@ export const AddonPortInstallButton = defineComponent({
         ...attrs,
         target: props.target,
         label: props.label,
+        mode: props.mode,
         "api-base-url": props.apiBaseUrl,
         disabled: props.disabled ? "" : undefined,
         "onAddonport-open": (event: CustomEvent<AddonPortOpenDetail>) => emit("open", event.detail),

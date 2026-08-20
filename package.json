@@ -1,6 +1,6 @@
 {
   "name": "@addonport/sdk",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "Protocol and frontend SDK for AddonPort native add-on handoffs.",
   "license": "MIT",
   "repository": {

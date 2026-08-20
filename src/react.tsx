@@ -1,12 +1,13 @@
 import "./elements.js";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useEffect, useRef } from "react";
-import type { AddonPortOpenDetail } from "./elements.js";
+import type { AddonPortButtonMode, AddonPortOpenDetail } from "./elements.js";
 import type { SessionSnapshot } from "./index.js";
 
 export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLElement>, "onError"> {
   target: string;
   label?: string;
+  mode?: AddonPortButtonMode;
   apiBaseUrl?: string;
   disabled?: boolean;
   onOpen?: (handoff: AddonPortOpenDetail) => void;
@@ -17,7 +18,7 @@ export interface AddonPortInstallButtonProps extends Omit<HTMLAttributes<HTMLEle
 
 export const AddonPortInstallButton = forwardRef<HTMLElement, AddonPortInstallButtonProps>(
   function AddonPortInstallButton(
-    { target, label, apiBaseUrl, disabled, onOpen, onStatus, onComplete, onError, ...props },
+    { target, label, mode, apiBaseUrl, disabled, onOpen, onStatus, onComplete, onError, ...props },
     forwardedRef,
   ) {
     const localRef = useRef<HTMLElement | null>(null);
@@ -52,6 +53,7 @@ export const AddonPortInstallButton = forwardRef<HTMLElement, AddonPortInstallBu
         }}
         target={target}
         label={label}
+        mode={mode}
         api-base-url={apiBaseUrl}
         disabled={disabled ? "" : undefined}
       />
@@ -68,6 +70,7 @@ declare module "react" {
       > & {
         target: string;
         label?: string;
+        mode?: AddonPortButtonMode;
         "api-base-url"?: string;
         disabled?: string;
       };
