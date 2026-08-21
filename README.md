@@ -54,9 +54,12 @@ document.querySelector("addonport-install-button").addEventListener("addonport-c
 });
 ~~~
 
-Set `mode="direct"` to skip Connect and open `addonport://install/<target>` immediately. Set
-`api-base-url="https://your-connect-endpoint.example"` to use a compatible private service instead
-of the public endpoint.
+Set `mode="direct"` to skip Connect and open `addonport://install/<target>` immediately.
+
+`api-base-url` is an advanced deployment option. It changes the service used by the browser SDK,
+but the native adapter must be independently configured for the same trusted origin. The public
+AddonPort for FACEIT adapter is pinned to `https://connect.addonport.dev`, so normal integrations
+must omit this attribute.
 
 ### Element contract
 
@@ -66,7 +69,7 @@ of the public endpoint.
 | `label` | No | Idle button label; defaults to `Install with AddonPort` |
 | `disabled` | No | Boolean attribute that disables interaction |
 | `mode` | No | `session` by default; set to `direct` to skip Connect |
-| `api-base-url` | No | Overrides the public Connect endpoint used by session mode |
+| `api-base-url` | No | Browser-side service override for a matching private adapter deployment |
 
 | Event | `detail` | Emitted in |
 | --- | --- | --- |

@@ -162,7 +162,7 @@ export class AddonPortInstallButton extends HTMLElementBase {
         this.getAttribute("api-base-url")?.trim() || DEFAULT_ADDONPORT_API_BASE_URL;
       this.#client = new AddonPortClient({
         apiBaseUrl,
-        client: { name: "@addonport/sdk/elements", version: "0.1.0-beta.3" },
+        client: { name: "@addonport/sdk/elements", version: "0.1.0-beta.5" },
       });
     }
     return this.#client;
